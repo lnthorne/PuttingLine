@@ -7,6 +7,7 @@ public class PuttingLineSetup : MonoBehaviour
 {
     public GameObject markerPrefab; // A prefab for visualizing the start and end points
     public ARRaycastManager arRaycastManager;
+    public MeshDataCollector meshDataCollector;
 
     public Vector3? startPoint = null;
     public Vector3? endPoint = null;
@@ -37,11 +38,13 @@ public class PuttingLineSetup : MonoBehaviour
                     {
                         startPoint = hitPose.position;
                         startPointMarker = Instantiate(markerPrefab, startPoint.Value, Quaternion.identity);
+                        meshDataCollector.StartCollection();
                     }
                     else if (endPoint == null)
                     {
                         endPoint = hitPose.position;
                         endPointMarker = Instantiate(markerPrefab, endPoint.Value, Quaternion.identity);
+                        meshDataCollector.StopCollection();
                     }
                 }
             }
@@ -56,6 +59,8 @@ public class PuttingLineSetup : MonoBehaviour
 
         if (endPointMarker != null)
             Destroy(endPointMarker);
+        
+        meshDataCollector.RemoveAllMeshes();
 
         startPoint = null;
         endPoint = null;
