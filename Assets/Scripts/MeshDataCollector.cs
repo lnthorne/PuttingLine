@@ -61,11 +61,18 @@ public class MeshDataCollector : MonoBehaviour
 
     public void RemoveAllMeshes()
     {
+        var arSession = FindObjectOfType<ARSession>();
+        if(arSession)
+        {
+            arSession.Reset();
+        }
         if (meshManager)
         {
+            Debug.Log("Number of meshes before destruction: " + meshManager.meshes.Count);
+
+            meshManager.subsystem.Stop();
             meshManager.DestroyAllMeshes();
-            meshManager.subsystem?.Stop();
-            meshManager.subsystem?.Start();
+            meshManager.subsystem.Start();
         }
     }
 }
