@@ -44,7 +44,6 @@ public class MeshDataCollector : MonoBehaviour
     public void StartCollection() 
     {
         collectedMeshData.Clear();
-        meshManager.subsystem?.Start();
         meshManager.enabled = true;
         isCollecting = true;
         Debug.Log("StartCollection");
@@ -53,11 +52,10 @@ public class MeshDataCollector : MonoBehaviour
     public void StopCollection()
     {
         meshManager.enabled = false;
-        meshManager.subsystem?.Stop();
         isCollecting = false;
+        Debug.Log(collectedMeshData.Count);
     }
 
-    // TODO: Find out how to remove the previous meshes https://forum.unity.com/threads/how-to-reset-meshes-generated-by-armeshmanager.1451887/
 
     public void RemoveAllMeshes()
     {
