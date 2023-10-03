@@ -18,6 +18,10 @@ public class LineCalculations
         float distance = Vector3.Distance(startPoint, endPoint);
 
         int numberOfSamples = Mathf.FloorToInt(distance / sampleRate);
+        Debug.Log("Number of samples: " + numberOfSamples);
+        Debug.Log("Distance: " + distance);
+        Debug.Log("Direction " + direction);
+        Debug.Log("Vertices: " + collectedMeshData[0].vertices.ToString());
         
         sampledHeights.Clear();
 
@@ -81,6 +85,9 @@ public class LineCalculations
         // Positive values mean the ground slopes upwards (relative to the direction of the putt), suggesting a right break.
         // Negative values mean the ground slopes downwards, suggesting a left break.
         float accumulatedBreak = slopes.Sum();
+        Debug.Log("Accumulated Break: " + accumulatedBreak);
+        Debug.Log("Start Point: " + startPoint);
+        Debug.Log("End Point: " + endPoint);
 
         Vector3 idealDirection = (endPoint - startPoint).normalized;
         
@@ -97,6 +104,32 @@ public class LineCalculations
         return idealDirection * strengthMultiplier;
     }
     
+    public Vector3 CalculateAverageSlopeDirection()
+{
+    // Ensure we have sampled positions
+    if (sampledHeights.Count < 2)
+    {
+        Debug.LogWarning("Not enough data to compute average slope direction!");
+        return Vector3.zero;
+    }
 
+    Vector3 totalDirection = Vector3.zero;
+    Vector3 previousPosition = startPoint;
 
+    for (int i = 0; i < sampledHeights.Count; i++)
+    {
+        Vector3 currentPosition = startPoint + (endPoint - startPoint).normalized * sampleRate * i;
+        currentPosition.y = sampledHeights[i];
+
+        Vector3 directionBetweenSamples = currentPosition - previousPosition;
+        totalDirection += directionBetweenSamples;
+
+        previousPosition = currentPosition;
+    }
+
+    return totalDirection.normalized;
+}
+
+// Idea: For the deltaY we really only care about the starting position and ending psoition. 
+// For the deltaX we actually do want the values in between to sum the curve
 }

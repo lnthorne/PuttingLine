@@ -61,29 +61,38 @@ public class PuttingLineSetup : MonoBehaviour
         startPoint = null;
         endPoint = null;
     }
-
-    private void SetRaycast(Touch touch) 
+     
+    //  TODO: The start point does need to be raycast on the mesh as well to get downhill data
+    // Currently works for uphill but not down
+   private void SetRaycast(Touch touch) 
     {
         List<ARRaycastHit> hits = new List<ARRaycastHit>();
-        if (arRaycastManager.Raycast(touch.position, hits, TrackableType.PlaneWithinPolygon))
-        {
-            Pose hitPose = hits[0].pose;
-            Debug.Log("We have hit something");
+        Ray ray = Camera.main.ScreenPointToRay(touch.position);
+        RaycastHit meshHit;
 
-            // Set either the start or end point, and instantiate visual markers
-            if (startPoint == null)
+        // If startPoint is not set yet, raycast against horizontal planes
+        if (startPoint == null)
+        {
+            if (arRaycastManager.Raycast(touch.position, hits, TrackableType.PlaneWithinPolygon))
             {
+                Pose hitPose = hits[0].pose;
+                Debug.Log("Starting point set on horizontal plane.");
+                
                 startPoint = hitPose.position;
                 startPointMarker = Instantiate(markerPrefab, startPoint.Value, Quaternion.identity);
                 meshDataCollector.StartCollection();
             }
-            else if (endPoint == null)
-            {
-                endPoint = hitPose.position;
-                endPointMarker = Instantiate(markerPrefab, endPoint.Value, Quaternion.identity);
-                meshDataCollector.StopCollection();
-                is_calculating = true;
-            }
+        }
+        // If startPoint is set and endPoint is not, raycast against mesh
+        else if (endPoint == null && Physics.Raycast(ray, out meshHit))
+        {
+            Debug.Log("End point set on AR mesh.");
+
+            endPoint = meshHit.point;
+            endPointMarker = Instantiate(markerPrefab, endPoint.Value, Quaternion.identity);
+            meshDataCollector.StopCollection();
+            is_calculating = true;
         }
     }
+
 }
