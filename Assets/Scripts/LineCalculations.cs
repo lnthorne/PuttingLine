@@ -64,25 +64,40 @@ public class LineCalculations
     }
 
     private List<float> ComputeSlopesFromSampledHeights()
+{
+    List<float> slopes = new List<float>();
+
+    // First, we need to determine the true horizontal distances between the sample points.
+    Vector3 previousPosition = startPoint;
+    for (int i = 1; i < sampledHeights.Count; i++)
     {
-        List<float> slopes = new List<float>();
+        // Calculate the current sample position in 3D space.
+        Vector3 currentPosition = startPoint + (endPoint - startPoint).normalized * sampleRate * i;
+        currentPosition.y = sampledHeights[i]; // Set the y-coordinate to the sampled height.
 
-        for (int i = 0; i < sampledHeights.Count - 1; i++)
-        {
-            float deltaY = sampledHeights[i + 1] - sampledHeights[i];
-            float slope = deltaY / sampleRate;
-            slopes.Add(slope);
-        }
+        // Calculate the true horizontal distance (ignoring the y-component).
+        Vector3 horizontalVector = new Vector3(currentPosition.x - previousPosition.x, 0, currentPosition.z - previousPosition.z);
+        float horizontalDistance = horizontalVector.magnitude;
 
-        return slopes;
+        // Calculate the vertical change in height (delta Y).
+        float deltaY = currentPosition.y - previousPosition.y;
+
+        // Calculate the slope for this segment. Slope is defined as "rise over run".
+        float slope = deltaY / horizontalDistance; // Ensure you're not dividing by zero.
+        slopes.Add(slope);
+
+        previousPosition = currentPosition; // Update the previousPosition for the next iteration.
     }
+
+    return slopes;
+}
 
     public Vector3 ComputeIdealPuttDirectionAndStrength()
     {
         List<float> slopes = ComputeSlopesFromSampledHeights();
 
         // Here, the stronger the accumulated value, the stronger the break.
-        // Positive values mean the ground slopes upwards (relative to the direction of the putt), suggesting a right break.
+        // Positive values mean the ground slopes upwards (relative to the direction of the putt), suggesting a right break. (Not left right, up or down)
         // Negative values mean the ground slopes downwards, suggesting a left break.
         float accumulatedBreak = slopes.Sum();
         Debug.Log("Accumulated Break: " + accumulatedBreak);

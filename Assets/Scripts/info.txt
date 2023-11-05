@@ -1,0 +1,29 @@
+Path creator example - https://www.youtube.com/watch?v=saAQNRSYU9k
+Path creator documentation - https://docs.google.com/document/d/1-FInNfD2GC-fVXO6KyeTSp9OSKst5AzLxDaBRb69b-Y/edit
+
+
+Research
+
+To determine the points for curve fitting in your putting app, you should consider the physics of a golf ball rolling 
+on a green's surface, which includes gravity, friction, and the green's slope and undulations. The points you choose should represent the ball's trajectory considering these factors. Here's how you can decide on these points:
+
+Start Point:
+The start point is the current location of the golf ball.
+End Point:
+The end point is the location of the hole.
+Intermediate Points:
+These are the points between the start and end points that the ball would naturally pass through if it were rolling on the actual green.
+To generate the intermediate points, you can use the following approach:
+
+Physics Simulation: Use Unity's physics engine to simulate the path of the ball. Apply a force to the ball and let the engine calculate the ball's trajectory as it interacts with the green's mesh collider. Record the ball's position at regular intervals to get a series of points that represent the ball's path.
+Slope and Elevation Analysis: Analyze the mesh data to understand the slopes and elevations of the green. The ball's path will be influenced by these features, curving downhill and slowing uphill.
+Manual Adjustment: Based on experience or empirical data, you might also manually adjust the ball's path to account for common putting knowledge, such as "aiming 10 cm left of the hole on a leftward slope."
+Incremental Refinement: Start with a rough path based on the above methods, then incrementally refine it by simulating putts and adjusting the path according to where the ball ends up. You keep refining until the simulation consistently results in the ball going into the hole.
+Once you have these points, you can use them as input for the CurveFit.Fit method to create a smooth curve. This curve won't necessarily pass through every intermediate point, but it will represent a smoothed path considering them.
+
+
+Idea: 
+- Scan in the green
+- Now let user simulate ("Practice") the putt and adjust the path
+- Then dsiplay that path over the green AR
+

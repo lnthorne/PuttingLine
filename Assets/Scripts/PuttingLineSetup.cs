@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
+using UnityEngine.EventSystems;
 
 public class PuttingLineSetup : MonoBehaviour
 {
@@ -29,7 +30,7 @@ public class PuttingLineSetup : MonoBehaviour
         if (Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
-            if (touch.phase == TouchPhase.Began)
+            if (touch.phase == TouchPhase.Began && !EventSystem.current.IsPointerOverGameObject(touch.fingerId))
             {
                 SetRaycast(touch);
             }
@@ -64,35 +65,28 @@ public class PuttingLineSetup : MonoBehaviour
      
     //  TODO: The start point does need to be raycast on the mesh as well to get downhill data
     // Currently works for uphill but not down
-   private void SetRaycast(Touch touch) 
+   private void SetRaycast(Touch touch)
+{
+    Ray ray = Camera.main.ScreenPointToRay(touch.position);
+    RaycastHit meshHit;
+
+    // If startPoint is not set yet, try to set it.
+    if (startPoint == null && Physics.Raycast(ray, out meshHit) && meshHit.collider is MeshCollider)
     {
-        List<ARRaycastHit> hits = new List<ARRaycastHit>();
-        Ray ray = Camera.main.ScreenPointToRay(touch.position);
-        RaycastHit meshHit;
-
-        // If startPoint is not set yet, raycast against horizontal planes
-        if (startPoint == null)
-        {
-            if (arRaycastManager.Raycast(touch.position, hits, TrackableType.PlaneWithinPolygon))
-            {
-                Pose hitPose = hits[0].pose;
-                Debug.Log("Starting point set on horizontal plane.");
-                
-                startPoint = hitPose.position;
-                startPointMarker = Instantiate(markerPrefab, startPoint.Value, Quaternion.identity);
-                meshDataCollector.StartCollection();
-            }
-        }
-        // If startPoint is set and endPoint is not, raycast against mesh
-        else if (endPoint == null && Physics.Raycast(ray, out meshHit))
-        {
-            Debug.Log("End point set on AR mesh.");
-
-            endPoint = meshHit.point;
-            endPointMarker = Instantiate(markerPrefab, endPoint.Value, Quaternion.identity);
-            meshDataCollector.StopCollection();
-            is_calculating = true;
-        }
+        Debug.Log("Starting point set on mesh collider.");
+        startPoint = meshHit.point;
+        startPointMarker = Instantiate(markerPrefab, startPoint.Value, Quaternion.identity);
+        // meshDataCollector.StartCollection();
     }
+    // If startPoint is set and endPoint is not, try to set endPoint.
+    else if (startPoint != null && endPoint == null && Physics.Raycast(ray, out meshHit) && meshHit.collider is MeshCollider)
+    {
+        Debug.Log("End point set on AR mesh.");
+        endPoint = meshHit.point;
+        endPointMarker = Instantiate(markerPrefab, endPoint.Value, Quaternion.identity);
+        // meshDataCollector.StopCollection();
+        is_calculating = true;
+    }
+}
 
 }
